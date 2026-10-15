@@ -1,10 +1,21 @@
-import { NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../auth/AuthProvider'
+import { useProfile } from '../auth/ProfileProvider'
 
-const NAV_ITEMS = [
-  { to: '/', label: '旅程', icon: '🧳' },
-  { to: '/settings', label: '設定', icon: '⚙️' },
+interface NavItem {
+  to: string
+  label: string
+  icon: string
+  /** 哪些網址也算在這個項目底下（例如旅程詳細頁屬於「旅程」） */
+  match: (path: string) => boolean
+}
+
+const BASE_ITEMS: NavItem[] = [
+  { to: '/', label: '旅程', icon: '🧳', match: (p) => p === '/' || p.startsWith('/trips') || p.startsWith('/join') },
+  { to: '/export', label: '匯出', icon: '📊', match: (p) => p.startsWith('/export') },
+  { to: '/settings', label: '設定', icon: '⚙️', match: (p) => p.startsWith('/settings') },
 ]
+const ADMIN_ITEM: NavItem = { to: '/admin/ai', label: 'AI 管理', icon: '🛠️', match: (p) => p.startsWith('/admin') }
 
 /**
  * 登入後的共用版面（RWD）
@@ -14,8 +25,11 @@ const NAV_ITEMS = [
  */
 export function AppLayout() {
   const { user } = useAuth()
+  const { profile } = useProfile()
+  const { pathname } = useLocation()
+  const NAV_ITEMS = profile?.is_admin ? [...BASE_ITEMS, ADMIN_ITEM] : BASE_ITEMS
   const avatar = user?.user_metadata?.avatar_url as string | undefined
-  const name = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? ''
+  const name = profile?.display_name || ((user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? '')
 
   const avatarEl = (size: string) =>
     avatar ? (
@@ -37,7 +51,7 @@ export function AppLayout() {
 
         <nav className="flex-1 space-y-1 px-3">
           {NAV_ITEMS.map((item) => (
-            <SideLink key={item.to} {...item} />
+            <SideLink key={item.to} {...item} active={item.match(pathname)} />
           ))}
         </nav>
 
@@ -70,9 +84,9 @@ export function AppLayout() {
 
       {/* 手機：下方導覽列 */}
       <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-        <div className="grid grid-cols-2">
+        <div className={`grid ${NAV_ITEMS.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
           {NAV_ITEMS.map((item) => (
-            <TabLink key={item.to} {...item} />
+            <TabLink key={item.to} {...item} active={item.match(pathname)} />
           ))}
         </div>
       </nav>
@@ -80,39 +94,35 @@ export function AppLayout() {
   )
 }
 
-function TabLink({ to, label, icon }: { to: string; label: string; icon: string }) {
+function TabLink({ to, label, icon, active }: NavItem & { active: boolean }) {
   return (
-    <NavLink
+    <Link
       to={to}
-      end
-      className={({ isActive }) =>
-        `flex flex-col items-center gap-0.5 py-2 text-xs ${isActive ? 'font-semibold text-teal-700' : 'text-slate-500'}`
-      }
+      aria-current={active ? 'page' : undefined}
+      className={`flex flex-col items-center gap-0.5 py-2 text-xs ${active ? 'font-semibold text-teal-700' : 'text-slate-500'}`}
     >
       <span aria-hidden className="text-xl leading-none">
         {icon}
       </span>
       {label}
-    </NavLink>
+    </Link>
   )
 }
 
-function SideLink({ to, label, icon }: { to: string; label: string; icon: string }) {
+function SideLink({ to, label, icon, active }: NavItem & { active: boolean }) {
   return (
-    <NavLink
+    <Link
       to={to}
-      end
       title={label}
-      className={({ isActive }) =>
-        `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm md:justify-center lg:justify-start ${
-          isActive ? 'bg-teal-50 font-semibold text-teal-700' : 'text-slate-600 hover:bg-slate-100'
-        }`
-      }
+      aria-current={active ? 'page' : undefined}
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm md:justify-center lg:justify-start ${
+        active ? 'bg-teal-50 font-semibold text-teal-700' : 'text-slate-600 hover:bg-slate-100'
+      }`}
     >
       <span aria-hidden className="text-xl leading-none">
         {icon}
       </span>
       <span className="md:sr-only lg:not-sr-only">{label}</span>
-    </NavLink>
+    </Link>
   )
 }
