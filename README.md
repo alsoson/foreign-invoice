@@ -2,7 +2,7 @@
 
 旅遊發票統計系統。前端 React＋Vite（PWA），後端 Supabase，部署在 GitHub Pages。
 
-詳細文件放在 [`docs/`](docs/README.md)。
+詳細文件放在 [`docs/`](docs/README.md)。修改版面前請先看 [RWD 規則](docs/rwd-guidelines.md)。
 
 目前進度：**階段 0（專案骨架）** — Google 登入、旅程列表、新增旅程、個人設定、手機版版面、PWA、自動部署。
 

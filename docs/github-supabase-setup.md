@@ -4,10 +4,13 @@
 
 | Workflow | 觸發條件 | 做什麼 |
 | --- | --- | --- |
-| `.github/workflows/deploy-web.yml`（Deploy Web） | `main` 有推送（`supabase/**` 與 `*.md` 除外） | 建置網站並部署到 GitHub Pages，建置時帶入 Supabase 網址與金鑰 |
+| `.github/workflows/deploy-web.yml`（Deploy Web） | `main` 有推送（只改 `supabase/**`、`docs/**`、`*.md` 時不執行） | 建置網站並部署到 GitHub Pages，建置時帶入 Supabase 網址與金鑰 |
 | `.github/workflows/deploy-db.yml`（Deploy Database） | `main` 的 `supabase/migrations/**` 有變更 | 執行 `supabase db push`，把尚未套用的 migration 推到 Supabase 雲端 |
 
 兩個 workflow 都可以到 GitHub repo 的 **Actions** 分頁手動執行。
+
+> 只修改文件（`docs/` 資料夾或任何 `.md` 檔）時，兩個 workflow 都不會執行，網站不會重新部署。
+> 但如果同一次推送裡還包含其他檔案（例如程式碼），網站仍會部署。
 
 Supabase 專案 ID：`yzzbilxzpjyhxgiilzaw`
 
