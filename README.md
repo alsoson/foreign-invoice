@@ -2,6 +2,8 @@
 
 旅遊發票統計系統。前端 React＋Vite（PWA），後端 Supabase，部署在 GitHub Pages。
 
+詳細文件放在 [`docs/`](docs/README.md)。
+
 目前進度：**階段 0（專案骨架）** — Google 登入、旅程列表、新增旅程、個人設定、手機版版面、PWA、自動部署。
 
 ## 專案結構
@@ -9,6 +11,7 @@
 ```
 foreign-invoice/
 ├─ .github/workflows/deploy-web.yml   # 推送到 main 後自動部署到 GitHub Pages
+├─ .github/workflows/deploy-db.yml    # migration 有變更時自動推到 Supabase
 ├─ public/icons/                      # App 圖示
 ├─ src/
 │  ├─ main.tsx、App.tsx               # 進入點與路由（Hash 路由）
@@ -18,6 +21,7 @@ foreign-invoice/
 │  ├─ lib/inAppBrowser.ts             # 偵測 LINE 等內建瀏覽器
 │  └─ pages/                          # 登入、旅程列表、個人設定
 ├─ supabase/                          # 資料庫 migration（Supabase CLI）
+├─ docs/                              # 專案文件（設定說明、操作手冊）
 ├─ .env.example                       # 環境變數範本
 ├─ index.html、vite.config.ts、package.json
 ```
@@ -100,6 +104,8 @@ Supabase CLI 已列在開發套件中，`npm install` 後即可用 `npx supabase
 | `npx supabase migration list` | 查看本機與雲端已套用的 migration |
 | `npx supabase migration new <名稱>` | 新增 migration 檔 |
 | `npx supabase db push` | 把尚未套用的 migration 推到雲端 |
+
+推送到 `main` 後會自動套用 migration，設定方式見 [docs/github-supabase-setup.md](docs/github-supabase-setup.md)。
 
 規則：
 

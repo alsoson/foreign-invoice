@@ -1,0 +1,37 @@
+name: Deploy Database
+
+# main 分支的 supabase/ 有變更時，自動把新的 migration 推到 Supabase 雲端
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-db
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      # 到 repo 的 Settings → Secrets and variables → Actions → Secrets 設定
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: yzzbilxzpjyhxgiilzaw
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: 連結 Supabase 專案
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+
+      - name: 顯示 migration 狀態
+        run: supabase migration list --password "$SUPABASE_DB_PASSWORD"
+
+      - name: 套用尚未執行的 migration
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD"
