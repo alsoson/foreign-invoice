@@ -4,24 +4,28 @@
 
 詳細文件放在 [`docs/`](docs/README.md)。修改版面前請先看 [RWD 規則](docs/rwd-guidelines.md)。
 
-目前進度：**階段 0（專案骨架）** — Google 登入、旅程列表、新增旅程、個人設定、手機版版面、PWA、自動部署。
+目前進度：架構文件的 **1～5 階段已完成** — 旅程與發票、拍照 AI 辨識＋翻譯（多家 AI 共存、自動備援、比對模式）、統計、匯出 Excel、邀請分享與即時同步、AI 管理後台、刪除帳號。功能說明見 [docs/features.md](docs/features.md)。
+
+上線前還需要：照 [docs/github-supabase-setup.md](docs/github-supabase-setup.md) 設定 GitHub Secrets／Variables，並照 [docs/ai-setup.md](docs/ai-setup.md) 設定至少一家 AI 的金鑰。
 
 ## 專案結構
 
 ```
 foreign-invoice/
 ├─ .github/workflows/deploy-web.yml   # 推送到 main 後自動部署到 GitHub Pages
-├─ .github/workflows/deploy-db.yml    # migration 有變更時自動推到 Supabase
+├─ .github/workflows/deploy-db.yml    # supabase/ 有變更時套用 migration、部署 Edge Functions
 ├─ public/icons/                      # App 圖示
 ├─ src/
 │  ├─ main.tsx、App.tsx               # 進入點與路由（Hash 路由）
-│  ├─ auth/AuthProvider.tsx           # 登入狀態、Google 登入
-│  ├─ components/                     # 版面、登入保護、載入動畫
-│  ├─ lib/supabase.ts                 # Supabase 連線
-│  ├─ lib/inAppBrowser.ts             # 偵測 LINE 等內建瀏覽器
-│  └─ pages/                          # 登入、旅程列表、個人設定
-├─ supabase/                          # 資料庫 migration（Supabase CLI）
-├─ docs/                              # 專案文件（設定說明、操作手冊）
+│  ├─ auth/                           # 登入狀態、個人資料
+│  ├─ components/                     # 版面、表單、共用元件
+│  ├─ hooks/                          # 載入資料的共用 hook
+│  ├─ lib/                            # Supabase 查詢、格式、統計、Excel、拍照辨識
+│  └─ pages/                          # 各頁面（trip/ 為單一旅程的分頁、admin/ 為管理頁）
+├─ supabase/
+│  ├─ migrations/                     # 資料庫 migration（Supabase CLI）
+│  └─ functions/                      # Edge Functions：scan-receipt（AI 辨識）、delete-account
+├─ docs/                              # 專案文件（設定說明、功能說明）
 ├─ .env.example                       # 環境變數範本
 ├─ index.html、vite.config.ts、package.json
 ```

@@ -1,11 +1,11 @@
 # GitHub 與 Supabase 連動設定
 
-推送程式到 GitHub 的 `main` 分支後，會自動執行兩件事：
+推送程式到 GitHub 的 `main` 分支後，會自動執行以下工作：
 
 | Workflow | 觸發條件 | 做什麼 |
 | --- | --- | --- |
 | `.github/workflows/deploy-web.yml`（Deploy Web） | `main` 有推送（只改 `supabase/**`、`docs/**`、`*.md` 時不執行） | 建置網站並部署到 GitHub Pages，建置時帶入 Supabase 網址與金鑰 |
-| `.github/workflows/deploy-db.yml`（Deploy Database） | `main` 的 `supabase/migrations/**` 有變更 | 執行 `supabase db push`，把尚未套用的 migration 推到 Supabase 雲端 |
+| `.github/workflows/deploy-db.yml`（Deploy Supabase） | `main` 的 `supabase/**` 有變更 | 執行 `supabase db push` 套用新的 migration，再部署 Edge Functions（`scan-receipt`、`delete-account`） |
 
 兩個 workflow 都可以到 GitHub repo 的 **Actions** 分頁手動執行。
 
@@ -59,6 +59,10 @@ GitHub repo → **Settings** → **Secrets and variables** → **Actions** → *
 
 > ⚠️ 這兩個是機密，只能放在 **Secrets**，不要放進 Variables 或程式碼。service_role key 也不要放進 repo。
 
+### 4-1. 設定 AI 辨識的金鑰
+
+拍照辨識需要至少一家 AI 服務的金鑰，設定方式見 [ai-setup.md](ai-setup.md)。沒有設定時，網站其他功能（手動記帳、統計、匯出、分享）都能正常使用。
+
 ### 5. 設定 Supabase 登入返回網址
 
 Supabase 後台 → **Authentication** → **URL Configuration**：
@@ -70,8 +74,8 @@ Supabase 後台 → **Authentication** → **URL Configuration**：
 
 ### 6. 確認是否成功
 
-1. 到 **Actions** 分頁，手動執行 **Deploy Web** 和 **Deploy Database**，兩個都要是綠色勾勾。
-2. **Deploy Database** 的「顯示 migration 狀態」步驟中，本機與雲端的 migration 應該一致。
+1. 到 **Actions** 分頁，手動執行 **Deploy Web** 和 **Deploy Supabase**，兩個都要是綠色勾勾。
+2. **Deploy Supabase** 的「顯示 migration 狀態」步驟中，本機與雲端的 migration 應該一致。
 3. 打開 `https://<你的帳號>.github.io/foreign-invoice/`，用 Google 登入並新增一個旅程，能出現在列表就代表全部正常。
 
 ---
@@ -84,7 +88,7 @@ npx supabase migration new <名稱>   # 產生新的 migration 檔
 git add . && git commit -m "說明" && git push
 ```
 
-推上去後 **Deploy Database** 會自動套用，不用再手動 `npx supabase db push`。
+推上去後 **Deploy Supabase** 會自動套用，不用再手動 `npx supabase db push`。修改 `supabase/functions/` 底下的程式也一樣，推上去就會重新部署 Edge Functions。
 
 規則：
 
@@ -95,7 +99,8 @@ git add . && git commit -m "說明" && git push
 
 | 狀況 | 原因與處理 |
 | --- | --- |
-| Deploy Database 在「連結 Supabase 專案」失敗 | `SUPABASE_ACCESS_TOKEN` 錯誤或過期，重新產生並更新 Secret |
+| Deploy Supabase 在「部署 Edge Functions」失敗 | 確認 `SUPABASE_ACCESS_TOKEN` 的帳號對這個專案有權限，並查看錯誤訊息是哪一個 function 的程式有問題 |
+| Deploy Supabase 在「連結 Supabase 專案」失敗 | `SUPABASE_ACCESS_TOKEN` 錯誤或過期，重新產生並更新 Secret |
 | `password authentication failed` | `SUPABASE_DB_PASSWORD` 錯誤，到 Supabase 重設密碼後更新 Secret |
 | `Remote migration versions not found in local migrations directory` | 有人直接在 Supabase 後台改過資料庫或刪了本機 migration 檔，需用 `npx supabase migration repair` 對齊 |
 | 網站打開是空白或顯示未設定 Supabase | Variables 沒設定好，設定後重新執行 Deploy Web |
