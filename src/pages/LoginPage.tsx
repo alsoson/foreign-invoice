@@ -26,12 +26,38 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-b from-teal-50 to-white px-6">
+    <div className="min-h-dvh bg-gradient-to-b from-teal-50 to-white lg:grid lg:grid-cols-2 lg:bg-none">
+      {/* 電腦：左側品牌區 */}
+      <div className="hidden flex-col justify-between bg-gradient-to-br from-teal-600 to-teal-800 p-12 text-white lg:flex">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-xl">🧾</span>
+          <span className="text-lg font-semibold">旅遊發票</span>
+        </div>
+        <div>
+          <h2 className="text-4xl font-bold leading-tight">
+            拍一張照，
+            <br />
+            旅途花費自動整理好
+          </h2>
+          <ul className="mt-8 space-y-3 text-teal-50">
+            <li>📷　拍照辨識外文發票</li>
+            <li>🌐　自動翻譯品項與店名</li>
+            <li>👥　用 LINE 邀請旅伴一起記帳</li>
+            <li>📊　依旅程統計並匯出 Excel</li>
+          </ul>
+        </div>
+        <p className="text-sm text-teal-100/80">網站與手機 App 共用同一個帳號</p>
+      </div>
+
+      <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-600 text-3xl text-white shadow">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-600 text-3xl text-white shadow lg:hidden">
           🧾
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">旅遊發票</h1>
+        <h1 className="text-2xl font-bold text-slate-900">
+          <span className="lg:hidden">旅遊發票</span>
+          <span className="hidden lg:inline">登入</span>
+        </h1>
         <p className="mt-2 text-sm text-slate-600">拍照記錄、翻譯、統計旅途中的每一筆花費</p>
 
         {!isSupabaseConfigured && (
@@ -68,6 +94,7 @@ export function LoginPage() {
         )}
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      </div>
       </div>
     </div>
   )

@@ -28,8 +28,8 @@ export function SettingsPage() {
   }, [user])
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-slate-900">個人設定</h2>
+    <div className="max-w-2xl space-y-4">
+      <h2 className="text-xl font-bold text-slate-900 md:text-2xl">個人設定</h2>
 
       <section className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         {profile?.avatar_url ? (
@@ -54,12 +54,12 @@ export function SettingsPage() {
       <button
         type="button"
         onClick={() => signOut()}
-        className="w-full rounded-lg border border-red-200 bg-white py-3 font-semibold text-red-600 active:bg-red-50"
+        className="w-full rounded-lg border border-red-200 bg-white py-3 font-semibold text-red-600 hover:bg-red-50 active:bg-red-100 md:w-auto md:px-8"
       >
         登出
       </button>
 
-      <p className="text-center text-xs text-slate-400">版本 {__APP_VERSION__}</p>
+      <p className="text-center text-xs text-slate-400 md:text-left">版本 {__APP_VERSION__}</p>
     </div>
   )
 }
