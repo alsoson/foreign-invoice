@@ -61,7 +61,7 @@ GitHub repo → **Settings** → **Secrets and variables** → **Actions** → *
 
 ### 4-1. 設定 AI 辨識的金鑰
 
-拍照辨識需要至少一家 AI 服務的金鑰，設定方式見 [ai-setup.md](ai-setup.md)。沒有設定時，網站其他功能（手動記帳、統計、匯出、分享）都能正常使用。
+拍照辨識需要至少一家 AI 服務的金鑰，設定方式見 [AI辨識設定.md](AI辨識設定.md)。沒有設定時，網站其他功能（手動記帳、統計、匯出、分享）都能正常使用。
 
 ### 5. 設定 Supabase 登入返回網址
 

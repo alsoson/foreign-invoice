@@ -2,11 +2,11 @@
 
 旅遊發票統計系統。前端 React＋Vite（PWA），後端 Supabase，部署在 GitHub Pages。
 
-詳細文件放在 [`docs/`](docs/README.md)。修改版面前請先看 [RWD 規則](docs/rwd-guidelines.md)。
+詳細文件放在 [`docs/`](docs/README.md)。修改版面前請先看 [RWD 規則](docs/RWD版面規則.md)。
 
-目前進度：架構文件的 **1～5 階段已完成** — 旅程與發票、拍照 AI 辨識＋翻譯（多家 AI 共存、自動備援、比對模式）、統計、匯出 Excel、邀請分享與即時同步、AI 管理後台、刪除帳號。功能說明見 [docs/features.md](docs/features.md)。
+目前進度：架構文件的 **1～5 階段已完成** — 旅程與發票、拍照 AI 辨識＋翻譯（多家 AI 共存、自動備援、比對模式）、統計、匯出 Excel、邀請分享與即時同步、AI 管理後台、刪除帳號。功能說明見 [docs/功能說明.md](docs/功能說明.md)。
 
-上線前還需要：照 [docs/github-supabase-setup.md](docs/github-supabase-setup.md) 設定 GitHub Secrets／Variables，並照 [docs/ai-setup.md](docs/ai-setup.md) 設定至少一家 AI 的金鑰。
+上線前還需要：照 [docs/GitHub與Supabase連動設定.md](docs/GitHub與Supabase連動設定.md) 設定 GitHub Secrets／Variables，並照 [docs/AI辨識設定.md](docs/AI辨識設定.md) 設定至少一家 AI 的金鑰。
 
 ## 專案結構
 
@@ -109,7 +109,7 @@ Supabase CLI 已列在開發套件中，`npm install` 後即可用 `npx supabase
 | `npx supabase migration new <名稱>` | 新增 migration 檔 |
 | `npx supabase db push` | 把尚未套用的 migration 推到雲端 |
 
-推送到 `main` 後會自動套用 migration，設定方式見 [docs/github-supabase-setup.md](docs/github-supabase-setup.md)。
+推送到 `main` 後會自動套用 migration，設定方式見 [docs/GitHub與Supabase連動設定.md](docs/GitHub與Supabase連動設定.md)。
 
 規則：
 

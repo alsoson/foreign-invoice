@@ -4,10 +4,12 @@
 
 | 文件 | 內容 |
 | --- | --- |
-| [features.md](features.md) | 功能說明：每個畫面、角色權限、與架構文件的差異、尚未實作的項目 |
-| [ai-setup.md](ai-setup.md) | AI 辨識設定：指定管理員、申請與設定金鑰、AI 管理頁、成效統計 |
-| [architecture.md](architecture.md) | 系統架構建議（技術選型、流程、資料表、登入與分享、OCR、匯出、開發階段） |
-| [rwd-guidelines.md](rwd-guidelines.md) | 版面 RWD 規則（斷點、導覽方式、各元件在不同螢幕的寫法、檢查清單） |
-| [github-supabase-setup.md](github-supabase-setup.md) | GitHub 與 Supabase 連動設定（自動部署網站、自動套用資料庫 migration） |
+| [功能說明.md](功能說明.md) | 功能說明：每個畫面、角色權限、與架構文件的差異、尚未實作的項目 |
+| [AI辨識設定.md](AI辨識設定.md) | AI 辨識設定：指定管理員、申請與設定金鑰、AI 管理頁、成效統計 |
+| [系統架構.md](系統架構.md) | 系統架構建議（技術選型、流程、資料表、登入與分享、OCR、匯出、開發階段） |
+| [RWD版面規則.md](RWD版面規則.md) | 版面 RWD 規則（斷點、導覽方式、各元件在不同螢幕的寫法、檢查清單） |
+| [GitHub與Supabase連動設定.md](GitHub與Supabase連動設定.md) | GitHub 與 Supabase 連動設定（自動部署網站、自動套用資料庫 migration） |
 
-新增文件時，請在上表補上一行。
+新增文件時，請以中文命名（例如 `操作手冊.md`），並在上表補上一行。
+
+> 本檔維持 `README.md` 這個名稱，GitHub 打開 `docs/` 資料夾時才會自動顯示這份目錄。

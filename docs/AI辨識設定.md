@@ -41,7 +41,7 @@ API 金鑰只放在 Supabase 的 Edge Function Secrets，**不會出現在網站
 
 設定後**立即生效**，不需要重新部署。到「AI 管理」頁，該服務會顯示「金鑰已設定」。
 
-> Edge Function 本身由 GitHub Actions 的 **Deploy Supabase** 自動部署（見 [github-supabase-setup.md](github-supabase-setup.md)）。
+> Edge Function 本身由 GitHub Actions 的 **Deploy Supabase** 自動部署（見 [GitHub與Supabase連動設定.md](GitHub與Supabase連動設定.md)）。
 
 ## 三、在「AI 管理」頁調整
 
