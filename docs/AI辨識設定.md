@@ -30,14 +30,40 @@ API 金鑰只放在 Supabase 的 Edge Function Secrets，**不會出現在網站
 | Anthropic Claude | console.anthropic.com → API Keys（需儲值） | `ANTHROPIC_API_KEY` |
 | 自架 Ollama | 你的伺服器網址（例如 Cloudflare Tunnel 的網址） | `OLLAMA_SELF_URL`，有驗證時另加 `OLLAMA_SELF_TOKEN` |
 
+設定完成後的 Secrets 長這樣（**以下全部是遮罩範例，不是真的金鑰**；文件、程式碼、截圖、聊天訊息裡都不要出現真的金鑰）：
+
+```env
+# Ollama Cloud（ollama.com → Settings → API Keys）
+OLLAMA_API_KEY=****************************************
+
+# Google Gemini（Google AI Studio，通常以 AIza 開頭）
+GEMINI_API_KEY=AIza***********************************
+
+# OpenAI（platform.openai.com，通常以 sk- 開頭）
+OPENAI_API_KEY=sk-proj-*******************************
+
+# Anthropic Claude（console.anthropic.com，通常以 sk-ant- 開頭）
+ANTHROPIC_API_KEY=sk-ant-*******************************
+
+# 自架 Ollama（網址＋選用的驗證密鑰）
+OLLAMA_SELF_URL=https://********.example.com
+OLLAMA_SELF_TOKEN=********************************
+```
+
+> 只需要設定要用的那幾家，其他留空即可。`SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY` 由 Supabase 自動提供給 Edge Function，**不用、也不要**自己設定。
+
 設定方式（擇一）：
 
 - **後台**：Supabase 後台 → **Edge Functions** → **Secrets**（或 Project Settings → Edge Functions）→ 新增上表的名稱與金鑰。
 - **指令**：
 
   ```bash
-  npx supabase secrets set GEMINI_API_KEY=你的金鑰 --project-ref yzzbilxzpjyhxgiilzaw
+  npx supabase secrets set GEMINI_API_KEY=AIza************ --project-ref yzzbilxzpjyhxgiilzaw
   ```
+
+  `AIza************` 換成你的真實金鑰；指令執行完建議清除終端機的歷史紀錄。
+
+設定後 Supabase 後台只會顯示金鑰的雜湊摘要，不會再顯示原文；要更換時直接用同一個名稱重新設定即可。
 
 設定後**立即生效**，不需要重新部署。到「AI 管理」頁，該服務會顯示「金鑰已設定」。
 
@@ -77,7 +103,13 @@ API 金鑰只放在 Supabase 的 Edge Function Secrets，**不會出現在網站
 
 使用者也可以在拍照頁自選一家（只用那一家，不備援）、辨識後「換一個 AI 重新辨識」，或開啟「比對模式」同時用兩家並逐欄挑選。
 
-## 五、成效統計
+## 五、金鑰外洩時
+
+1. 立刻到該服務的後台**撤銷（Revoke／Delete）**那把金鑰，並產生新的。
+2. 用同一個 Secret 名稱設定新金鑰（見第二節）。
+3. 如果金鑰曾被 commit 進 Git，就算之後刪掉，歷史紀錄裡仍然看得到，**一定要撤銷**，不能只刪檔案。
+
+## 六、成效統計
 
 「AI 管理」頁下方的「各家成效」會顯示最近 7／30／90 天：
 
