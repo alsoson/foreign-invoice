@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'supabase/**'
       - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
