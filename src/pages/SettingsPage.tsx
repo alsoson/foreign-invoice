@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../auth/AuthProvider'
 import { useProfile } from '../auth/ProfileProvider'
-import { editableTrips, errorMessage, listProviders, ownedTripsWithMembers, updateProfile } from '../lib/api'
+import { editableTrips, errorMessage, ownedTripsWithMembers, updateProfile } from '../lib/api'
+import { loadProviderOptions } from '../lib/scan'
 import { supabase } from '../lib/supabase'
 import { useLoad } from '../hooks/useLoad'
 import { CURRENCIES } from '../lib/types'
@@ -11,7 +12,8 @@ import { Avatar, btn, Card, ErrorBox, Field, inputClass, Notice, PageTitle } fro
 export function SettingsPage() {
   const { user, signOut } = useAuth()
   const { profile, reloadProfile } = useProfile()
-  const providers = useLoad(() => listProviders(), [])
+  // 只列出已啟用、而且有設定金鑰的 AI（金鑰狀態由 Edge Function 回報）
+  const providers = useLoad(async () => (await loadProviderOptions()).providers.filter((p) => p.enabled && p.configured), [])
   const trips = useLoad(() => (user ? editableTrips(user.id) : Promise.resolve([])), [user?.id])
   const [defaultTrip, setDefaultTrip] = useState('')
   const [name, setName] = useState('')
@@ -76,13 +78,12 @@ export function SettingsPage() {
           <Field label="慣用的 AI" hint="拍照辨識時優先使用">
             <select className={inputClass} value={ai} onChange={(e) => setAi(e.target.value)}>
               <option value="">依系統預設</option>
-              {(providers.data ?? [])
-                .filter((p) => p.enabled || p.id === ai)
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.display_name}
-                  </option>
-                ))}
+              {(providers.data ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.display_name}
+                </option>
+              ))}
+              {ai && providers.data && !providers.data.some((p) => p.id === ai) && <option value={ai}>（目前無法使用，會改用系統預設）</option>}
             </select>
           </Field>
           <Field label="預設旅程" className="sm:col-span-2" hint="設定後，打開 App 會直接進到這個旅程的拍照辨識；沒設定則顯示旅程列表">

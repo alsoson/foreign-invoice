@@ -73,7 +73,9 @@ export function ScanPage() {
   }
 
   const providers = (opts.data?.providers ?? []).filter((p) => p.enabled)
-  const usable = providers.filter((p) => p.configured && p.remaining_today !== 0)
+  // 沒設定金鑰的 AI 不顯示給使用者（管理員到「AI 管理」頁看）
+  const listed = providers.filter((p) => p.configured)
+  const usable = listed.filter((p) => p.remaining_today !== 0)
   const nameOf = (id: string) => providers.find((p) => p.id === id)?.display_name ?? id
 
   if (!canEdit(role)) return <Notice>你是檢視者，不能新增發票。</Notice>
@@ -210,10 +212,10 @@ export function ScanPage() {
                 <Field label="使用的 AI">
                   <select className={inputClass} value={choice} onChange={(e) => setChoice(e.target.value)} aria-label="使用的 AI">
                     <option value="">自動（依預設順序，失敗自動換下一家）</option>
-                    {providers.map((p) => (
-                      <option key={p.id} value={p.id} disabled={!p.configured || p.remaining_today === 0}>
+                    {listed.map((p) => (
+                      <option key={p.id} value={p.id} disabled={p.remaining_today === 0}>
                         {p.display_name}
-                        {!p.configured ? '（未設定）' : p.remaining_today === 0 ? '（今日已達上限）' : p.remaining_today !== null ? `（今日剩 ${p.remaining_today} 次）` : ''}
+                        {p.remaining_today === 0 ? '（今日已達上限）' : p.remaining_today !== null ? `（今日剩 ${p.remaining_today} 次）` : ''}
                       </option>
                     ))}
                   </select>
