@@ -118,7 +118,7 @@ export function TripLayout() {
               <p className="mt-0.5 text-sm text-slate-500">
                 {formatDateRange(trip.start_date, trip.end_date)}
                 {trip.country && ` · ${trip.country}`} · {trip.default_currency}
-                {role && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{ROLE_LABEL[role]}</span>}
+                {role && <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{ROLE_LABEL[role]}</span>}
               </p>
             </div>
           </div>

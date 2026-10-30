@@ -80,11 +80,11 @@ OLLAMA_SELF_TOKEN=********************************
 | 逾時 | 超過秒數沒回應就換下一家（5～60 秒） |
 | 設為系統預設 | 沒有個人或旅程預設時，第一個嘗試的服務 |
 
-初始設定（migration `20261015000001_app.sql` 建立）：
+初始設定（migration `20261015000001_app.sql` 建立，Ollama Cloud 的模型由 `20261030000002_ollama_model.sql` 改為 `gemma4:31b`）：
 
 | 服務 | 預設模型 | 啟用 | 備援順序 | 每日上限 |
 | --- | --- | --- | --- | --- |
-| Ollama Cloud（系統預設） | `qwen3-vl:235b-cloud` | ✔ | 10 | 50 |
+| Ollama Cloud（系統預設） | `gemma4:31b` | ✔ | 10 | 50 |
 | Google Gemini | `gemini-2.5-flash` | ✔ | 20 | 50 |
 | OpenAI | `gpt-5-mini` | ✘ | 30 | 30 |
 | Claude | `claude-haiku-4-5` | ✘ | 40 | 30 |

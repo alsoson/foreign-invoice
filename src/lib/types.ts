@@ -146,3 +146,12 @@ export const CURRENCIES = ['JPY', 'KRW', 'THB', 'TWD', 'USD', 'EUR', 'HKD', 'CNY
 export function canEdit(role: Role | null | undefined): boolean {
   return role === 'owner' || role === 'editor'
 }
+
+/** 內建 AI 服務的顯示名稱（自訂服務沒有對應時顯示代號） */
+export const PROVIDER_LABEL: Record<string, string> = {
+  'ollama-cloud': 'Ollama Cloud',
+  gemini: 'Google Gemini',
+  openai: 'OpenAI',
+  claude: 'Claude',
+  'ollama-self': '自架 Ollama',
+}

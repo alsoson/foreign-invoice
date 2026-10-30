@@ -294,7 +294,7 @@ export function ScanPage() {
                       <p className="mt-1 text-xs text-amber-700">
                         已自動備援：
                         {last.attempts
-                          .filter((a) => a.status !== 'success')
+                          .filter((a) => a.status !== 'success' && a.status !== 'not_configured')
                           .map((a) => `${nameOf(a.provider)}${ATTEMPT_TEXT[a.status] ?? a.status}`)
                           .join('、')}
                       </p>
@@ -361,10 +361,12 @@ export function ScanPage() {
 }
 
 function AttemptList({ attempts, nameOf }: { attempts: Attempt[]; nameOf: (id: string) => string }) {
-  if (!attempts.length) return null
+  // 沒設定金鑰的 AI 不顯示給使用者（管理員到「AI 管理」頁看）
+  const shown = attempts.filter((a) => a.status !== 'not_configured')
+  if (!shown.length) return null
   return (
     <ul className="mt-3 space-y-1 text-sm">
-      {attempts.map((a, i) => (
+      {shown.map((a, i) => (
         <li key={i} className="text-slate-600">
           <b>{nameOf(a.provider)}</b>：{ATTEMPT_TEXT[a.status] ?? a.status}
           {a.message && <span className="block text-xs text-slate-400">{a.message}</span>}

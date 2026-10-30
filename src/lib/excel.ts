@@ -2,7 +2,7 @@
 import type { Cell, Row as XRow, Sheet } from 'write-excel-file/browser'
 import { listItems, listMembers, listReceiptsForTrips } from './api'
 import { byCategory, byDay, currenciesOf, tripDays } from './stats'
-import { CATEGORY_MAP, PAYMENT_LABEL, type Member, type Receipt, type ReceiptItem, type Trip } from './types'
+import { CATEGORY_MAP, PAYMENT_LABEL, PROVIDER_LABEL, type Member, type Receipt, type ReceiptItem, type Trip } from './types'
 import { formatDateRange } from './format'
 
 type Mode = 'separate' | 'merged'
@@ -64,7 +64,7 @@ function receiptRows(list: TripData[], withTrip: boolean): XRow[] {
         S(PAYMENT_LABEL[r.payment_method] ?? r.payment_method),
         S(name(r.paid_by)),
         S(name(r.created_by)),
-        S(r.ai_provider === 'manual' || !r.ai_provider ? '手動輸入' : r.ai_provider),
+        S(r.ai_provider === 'manual' || !r.ai_provider ? '手動輸入' : (PROVIDER_LABEL[r.ai_provider] ?? r.ai_provider)),
         S(r.note),
       ]
       rows.push(withTrip ? [S(t.trip.name), ...row] : row)
