@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router'
+import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
+import { launch } from './lib/launch'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { ProfileProvider } from './auth/ProfileProvider'
 import { RequireAuth } from './components/RequireAuth'
@@ -25,11 +26,19 @@ import { AdminAiPage } from './pages/admin/AdminAiPage'
 function ReturnToHandler() {
   const { session, takeReturnTo } = useAuth()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   useEffect(() => {
     if (!session) return
     const target = takeReturnTo()
-    if (target) navigate(target, { replace: true })
+    if (target) {
+      launch.cancel()
+      navigate(target, { replace: true })
+    }
   }, [session])
+  // 離開首頁後，就不再自動進入預設旅程
+  useEffect(() => {
+    if (pathname !== '/') launch.cancel()
+  }, [pathname])
   return null
 }
 

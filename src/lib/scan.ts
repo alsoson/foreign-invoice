@@ -129,4 +129,5 @@ export const ATTEMPT_TEXT: Record<string, string> = {
   invalid_output: '回傳格式錯誤',
   not_configured: '未設定金鑰',
   daily_limit: '已達今日上限',
+  skipped: '時間不足未嘗試',
 }

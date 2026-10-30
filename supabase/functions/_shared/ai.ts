@@ -235,7 +235,12 @@ const PAYMENT_WORDS: [ScanResult['payment_method'], RegExp][] = [
 ]
 const PAYMENT_CODES = ['cash', 'credit_card', 'e_payment', 'other'] as const
 
-const SYMBOLS: Record<string, string> = { '円': 'JPY', '¥': 'JPY', '￥': 'JPY', '₩': 'KRW', '원': 'KRW', '฿': 'THB', '€': 'EUR', '£': 'GBP', '₫': 'VND', 'NT$': 'TWD' }
+// 單獨的「$」「元」無法判斷是哪一國，留給使用者確認
+const SYMBOLS: Record<string, string> = {
+  '円': 'JPY', '¥': 'JPY', '￥': 'JPY', '₩': 'KRW', '원': 'KRW', '฿': 'THB', '€': 'EUR', '£': 'GBP', '₫': 'VND',
+  'NT$': 'TWD', 'US$': 'USD', 'HK$': 'HKD', 'S$': 'SGD', 'A$': 'AUD', 'AU$': 'AUD', 'C$': 'CAD', 'CA$': 'CAD', 'NZ$': 'NZD',
+  'MOP$': 'MOP', 'RM': 'MYR', '₱': 'PHP', 'RP': 'IDR', '₹': 'INR', 'CHF': 'CHF',
+}
 
 function isDate(s: string | null): s is string {
   if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
@@ -275,7 +280,7 @@ export function normalize(raw: unknown): ScanResult {
       : (PAYMENT_WORDS.find(([, re]) => re.test(payRaw))?.[0] ?? 'other')
 
   let currency = str(o.currency)?.toUpperCase() ?? null
-  if (currency && !/^[A-Z]{3}$/.test(currency)) currency = SYMBOLS[str(o.currency)!] ?? null
+  if (currency && !/^[A-Z]{3}$/.test(currency)) currency = SYMBOLS[str(o.currency)!] ?? SYMBOLS[currency] ?? null
 
   const date = str(o.receipt_date)
   const result: ScanResult = {

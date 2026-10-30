@@ -2,7 +2,8 @@ import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useTrip } from './TripLayout'
 import { useAuth } from '../../auth/AuthProvider'
-import { markScanLog, saveReceipt } from '../../lib/api'
+import { editableTrips, errorMessage, markScanLog, saveReceipt, setDefaultTrip } from '../../lib/api'
+import { useProfile } from '../../auth/ProfileProvider'
 import { useLoad } from '../../hooks/useLoad'
 import { ATTEMPT_TEXT, SCAN_ERROR_TEXT, ScanFailed, compressImage, loadProviderOptions, scanReceipt, type Attempt, type CompressedImage, type ScanResponse } from '../../lib/scan'
 import { canEdit, CATEGORY_MAP, PAYMENT_LABEL, type ReceiptDraft, type Trip } from '../../lib/types'
@@ -51,6 +52,25 @@ export function ScanPage() {
   const [compareB, setCompareB] = useState('')
   const [rescanWith, setRescanWith] = useState('')
   const opts = useLoad(() => loadProviderOptions(trip.id), [trip.id])
+  const { profile, reloadProfile } = useProfile()
+  const trips = useLoad(() => (user ? editableTrips(user.id) : Promise.resolve([])), [user?.id])
+  const [defaultBusy, setDefaultBusy] = useState(false)
+  const [defaultError, setDefaultError] = useState<string | null>(null)
+  const isDefault = profile?.default_trip_id === trip.id
+
+  async function toggleDefault() {
+    if (!user) return
+    setDefaultBusy(true)
+    setDefaultError(null)
+    try {
+      await setDefaultTrip(user.id, isDefault ? null : trip.id)
+      await reloadProfile()
+    } catch (e) {
+      setDefaultError(errorMessage(e))
+    } finally {
+      setDefaultBusy(false)
+    }
+  }
 
   const providers = (opts.data?.providers ?? []).filter((p) => p.enabled)
   const usable = providers.filter((p) => p.configured && p.remaining_today !== 0)
@@ -126,7 +146,42 @@ export function ScanPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-xl font-bold text-slate-900 md:text-2xl">拍照辨識</h2>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+        <h2 className="text-xl font-bold text-slate-900 md:text-2xl">拍照辨識</h2>
+        {phase.kind === 'pick' && (
+          <div className="flex w-full min-w-0 items-end gap-2 sm:w-auto">
+            <Field label="旅程" className="min-w-0 flex-1 sm:w-64 sm:flex-none">
+              <select
+                className={inputClass}
+                value={trip.id}
+                aria-label="切換旅程"
+                onChange={(e) => {
+                  reset()
+                  navigate(`/trips/${e.target.value}/scan`, { replace: true })
+                }}
+              >
+                {(trips.data?.some((t) => t.id === trip.id) ? trips.data : [trip, ...(trips.data ?? [])]).map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.id === profile?.default_trip_id ? '★ ' : ''}
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <button
+              type="button"
+              className={(isDefault ? btn.secondary + ' text-teal-700' : btn.secondary) + ' shrink-0 whitespace-nowrap'}
+              disabled={defaultBusy || !profile}
+              aria-pressed={isDefault}
+              onClick={toggleDefault}
+              title={isDefault ? '取消預設旅程' : '打開 App 時直接進到這個旅程的拍照辨識'}
+            >
+              {defaultBusy ? '儲存中…' : isDefault ? '★ 預設' : '☆ 設為預設'}
+            </button>
+          </div>
+        )}
+      </div>
+      <ErrorBox>{defaultError}</ErrorBox>
 
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => onFile(e.target.files?.[0] ?? undefined)} data-testid="camera-input" />
       <input ref={albumRef} type="file" accept="image/*" className="hidden" onChange={(e) => onFile(e.target.files?.[0] ?? undefined)} data-testid="album-input" />

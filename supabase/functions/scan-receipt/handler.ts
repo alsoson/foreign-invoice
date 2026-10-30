@@ -13,6 +13,9 @@ import { bearer, corsHeaders, json, type Deps } from '../_shared/http.ts'
 const MAX_IMAGE_BASE64 = 7_000_000 // 約 5MB 的圖片
 const MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const WINDOW_MS = 24 * 60 * 60 * 1000 // 每人每日上限以「最近 24 小時」計算
+// 整個請求的時間上限：Edge Function 約 150 秒會被強制中斷，留一點餘裕給寫紀錄與回應
+const DEADLINE_MS = 120_000
+const MIN_ATTEMPT_MS = 5_000 // 剩下的時間少於這個就不再嘗試下一家
 
 interface Attempt {
   provider: string
@@ -22,6 +25,7 @@ interface Attempt {
 
 export function createHandler(deps: Deps) {
   return async (req: Request): Promise<Response> => {
+    const deadline = Date.now() + DEADLINE_MS
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
     if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
 
@@ -127,6 +131,11 @@ export function createHandler(deps: Deps) {
         continue
       }
       if (tried > 0 && !allowFallback) break
+      const budgetMs = Math.min(p.timeout_seconds * 1000, deadline - Date.now())
+      if (budgetMs < MIN_ATTEMPT_MS) {
+        attempts.push({ provider: p.id, status: 'skipped', message: '時間不足，未嘗試' })
+        continue
+      }
 
       const isFallback = tried > 0
       // 先原子地預留一次額度（同時送出多張也不會超過上限）
@@ -146,7 +155,7 @@ export function createHandler(deps: Deps) {
       tried++
       const started = Date.now()
       const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), p.timeout_seconds * 1000)
+      const timer = setTimeout(() => controller.abort(), budgetMs)
       try {
         const text = await ADAPTERS[p.adapter]({ provider: p, apiKey: cred.apiKey, baseUrl: cred.baseUrl, image, mimeType, fetch: deps.fetch, signal: controller.signal })
         const result = normalize(extractJson(text))

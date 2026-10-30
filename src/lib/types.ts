@@ -66,6 +66,8 @@ export interface Profile {
   default_currency: string
   locale: string
   preferred_ai_provider: string | null
+  /** 預設旅程：打開 App 直接進到這個旅程的拍照辨識 */
+  default_trip_id: string | null
   is_admin: boolean
 }
 

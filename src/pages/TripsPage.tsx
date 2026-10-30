@@ -1,25 +1,52 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthProvider'
 import { useProfile } from '../auth/ProfileProvider'
-import { createTrip, listTrips, myRoles, tripSummaries } from '../lib/api'
+import { createTrip, errorMessage, listTrips, myRoles, setDefaultTrip, tripSummaries } from '../lib/api'
+import { launch } from '../lib/launch'
 import { useLoad } from '../hooks/useLoad'
 import { formatDateRange, formatMoney } from '../lib/format'
-import { ROLE_LABEL } from '../lib/types'
+import { canEdit, ROLE_LABEL } from '../lib/types'
 import { TripForm } from '../components/TripForm'
 import { btn, Card, Empty, ErrorBox, Loading, PageTitle } from '../components/ui'
 
 /** 旅程列表：我建立的＋別人分享給我的，顯示發票張數與各幣別總額 */
 export function TripsPage() {
   const { user } = useAuth()
-  const { profile } = useProfile()
+  const { profile, reloadProfile } = useProfile()
   const navigate = useNavigate()
   const [showForm, setShowForm] = useState(false)
+  const [defaultBusy, setDefaultBusy] = useState<string | null>(null)
+  const [defaultError, setDefaultError] = useState<string | null>(null)
 
   const { data, error, loading } = useLoad(async () => {
     const [trips, sums, roles] = await Promise.all([listTrips(), tripSummaries(), user ? myRoles(user.id) : Promise.resolve({})])
     return { trips, sums, roles: roles as Record<string, keyof typeof ROLE_LABEL> }
   }, [user?.id])
+
+  const defaultId = profile?.default_trip_id ?? null
+
+  // 剛打開 App：有預設旅程（且可以新增發票）就直接進到拍照辨識
+  useEffect(() => {
+    if (!data || !profile) return
+    if (!launch.take()) return
+    const t = defaultId ? data.trips.find((x) => x.id === defaultId) : undefined
+    if (t && canEdit(data.roles[t.id])) navigate(`/trips/${t.id}/scan`)
+  }, [data, profile])
+
+  async function toggleDefault(tripId: string) {
+    if (!user) return
+    setDefaultBusy(tripId)
+    setDefaultError(null)
+    try {
+      await setDefaultTrip(user.id, defaultId === tripId ? null : tripId)
+      await reloadProfile()
+    } catch (e) {
+      setDefaultError(errorMessage(e))
+    } finally {
+      setDefaultBusy(null)
+    }
+  }
 
   return (
     <div>
@@ -53,6 +80,10 @@ export function TripsPage() {
       )}
 
       <ErrorBox>{error && `讀取失敗：${error}`}</ErrorBox>
+      <ErrorBox>{defaultError}</ErrorBox>
+      {data && data.trips.length > 0 && !defaultId && (
+        <p className="mb-3 text-sm text-slate-500">小技巧：把旅程「設為預設」，下次打開 App 會直接進到拍照辨識。</p>
+      )}
       {loading && !data && <Loading />}
 
       {data?.trips.length === 0 && !showForm && (
@@ -61,17 +92,17 @@ export function TripsPage() {
         </Empty>
       )}
 
-      <ul className="grid gap-3 sm:grid-cols-2 md:gap-4 xl:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 xl:grid-cols-3">
         {data?.trips.map((t) => {
           const sums = data.sums.filter((s) => s.trip_id === t.id)
           const count = sums.reduce((n, s) => n + s.receipt_count, 0)
           const role = data.roles[t.id]
           return (
-            <li key={t.id}>
-              <Link
-                to={`/trips/${t.id}`}
-                className="block h-full rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md hover:ring-teal-300 md:p-5"
-              >
+            <li
+              key={t.id}
+              className={`flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition hover:shadow-md ${t.id === defaultId ? 'ring-2 ring-teal-500' : 'ring-slate-200 hover:ring-teal-300'}`}
+            >
+              <Link to={`/trips/${t.id}`} className="block flex-1 p-4 md:p-5">
                 <div className="flex items-start justify-between gap-2">
                   <p className="min-w-0 break-words font-semibold text-slate-900">{t.name}</p>
                   <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{t.default_currency}</span>
@@ -100,6 +131,26 @@ export function TripsPage() {
                   )}
                 </div>
               </Link>
+              {canEdit(role) && (
+                <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 md:px-5">
+                  {t.id === defaultId ? (
+                    <Link to={`/trips/${t.id}/scan`} className="text-sm font-medium text-teal-700">
+                      📷 拍照辨識
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+                  <button
+                    type="button"
+                    className={`text-sm ${t.id === defaultId ? 'font-medium text-teal-700' : 'text-slate-500 hover:text-teal-700'}`}
+                    disabled={defaultBusy !== null}
+                    aria-pressed={t.id === defaultId}
+                    onClick={() => toggleDefault(t.id)}
+                  >
+                    {defaultBusy === t.id ? '儲存中…' : t.id === defaultId ? '★ 預設旅程' : '☆ 設為預設'}
+                  </button>
+                </div>
+              )}
             </li>
           )
         })}

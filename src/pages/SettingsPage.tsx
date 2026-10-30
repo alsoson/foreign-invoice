@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../auth/AuthProvider'
 import { useProfile } from '../auth/ProfileProvider'
-import { errorMessage, listProviders, ownedTripsWithMembers, updateProfile } from '../lib/api'
+import { editableTrips, errorMessage, listProviders, ownedTripsWithMembers, updateProfile } from '../lib/api'
 import { supabase } from '../lib/supabase'
 import { useLoad } from '../hooks/useLoad'
 import { CURRENCIES } from '../lib/types'
@@ -12,6 +12,8 @@ export function SettingsPage() {
   const { user, signOut } = useAuth()
   const { profile, reloadProfile } = useProfile()
   const providers = useLoad(() => listProviders(), [])
+  const trips = useLoad(() => (user ? editableTrips(user.id) : Promise.resolve([])), [user?.id])
+  const [defaultTrip, setDefaultTrip] = useState('')
   const [name, setName] = useState('')
   const [currency, setCurrency] = useState('TWD')
   const [ai, setAi] = useState('')
@@ -24,6 +26,7 @@ export function SettingsPage() {
     setName(profile.display_name)
     setCurrency(profile.default_currency)
     setAi(profile.preferred_ai_provider ?? '')
+    setDefaultTrip(profile.default_trip_id ?? '')
   }, [profile])
 
   async function save(e: FormEvent) {
@@ -33,7 +36,7 @@ export function SettingsPage() {
     setSaved(false)
     setError(null)
     try {
-      await updateProfile(user.id, { display_name: name.trim(), default_currency: currency, preferred_ai_provider: ai || null })
+      await updateProfile(user.id, { display_name: name.trim(), default_currency: currency, preferred_ai_provider: ai || null, default_trip_id: defaultTrip || null })
       await reloadProfile()
       setSaved(true)
     } catch (err) {
@@ -80,6 +83,17 @@ export function SettingsPage() {
                     {p.display_name}
                   </option>
                 ))}
+            </select>
+          </Field>
+          <Field label="預設旅程" className="sm:col-span-2" hint="設定後，打開 App 會直接進到這個旅程的拍照辨識；沒設定則顯示旅程列表">
+            <select className={inputClass} value={defaultTrip} onChange={(e) => setDefaultTrip(e.target.value)}>
+              <option value="">不使用（打開 App 顯示旅程列表）</option>
+              {(trips.data ?? []).map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+              {defaultTrip && trips.data && !trips.data.some((t) => t.id === defaultTrip) && <option value={defaultTrip}>（已無法使用的旅程）</option>}
             </select>
           </Field>
           <div className="sm:col-span-2">

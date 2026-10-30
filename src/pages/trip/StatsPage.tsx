@@ -63,7 +63,7 @@ export function StatsPage() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
         <Card>
           <h3 className="mb-3 font-semibold text-slate-900">依類別</h3>
           <BarList rows={byCategory(list)} total={total} currency={currency} icon={(k) => CATEGORY_MAP[k as Category]?.icon} />
@@ -79,7 +79,7 @@ export function StatsPage() {
         <DailyChart rows={daily} currency={currency} />
       </Card>
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
         <Card>
           <h3 className="mb-3 font-semibold text-slate-900">消費最多的店家</h3>
           <BarList rows={byStore(list)} total={total} currency={currency} ranked />

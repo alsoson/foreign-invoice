@@ -237,15 +237,26 @@ export async function getProfile(id: string): Promise<Profile | null> {
   const rows = check(
     await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, default_currency, locale, preferred_ai_provider, is_admin')
+      .select('id, display_name, avatar_url, default_currency, locale, preferred_ai_provider, default_trip_id, is_admin')
       .eq('id', id)
       .limit(1),
   ) as Profile[]
   return rows[0] ?? null
 }
 
-export async function updateProfile(id: string, input: Partial<Pick<Profile, 'display_name' | 'default_currency' | 'preferred_ai_provider'>>): Promise<void> {
+export async function updateProfile(id: string, input: Partial<Pick<Profile, 'display_name' | 'default_currency' | 'preferred_ai_provider' | 'default_trip_id'>>): Promise<void> {
   check(await supabase.from('profiles').update(input).eq('id', id))
+}
+
+/** 設定或取消預設旅程（tripId 為 null 表示取消） */
+export async function setDefaultTrip(userId: string, tripId: string | null): Promise<void> {
+  await updateProfile(userId, { default_trip_id: tripId })
+}
+
+/** 自己可以新增發票的旅程（擁有者或編輯者），用於預設旅程與切換旅程 */
+export async function editableTrips(userId: string): Promise<Trip[]> {
+  const [trips, roles] = await Promise.all([listTrips(), myRoles(userId)])
+  return trips.filter((t) => roles[t.id] === 'owner' || roles[t.id] === 'editor')
 }
 
 export async function ownedTripsWithMembers(): Promise<{ trip_id: string; name: string; member_count: number }[]> {
